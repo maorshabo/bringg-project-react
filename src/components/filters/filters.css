@@ -1,0 +1,20 @@
+.filter-container {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-container label {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.filter-container input {
+    outline: none;
+    width: 100%;
+    border-radius: 15px;
+    padding: 6px 12px;
+    border: #CCC 1px solid;
+}
