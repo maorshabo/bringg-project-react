@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TaskRow, { TaskProps } from './TaskRow';
+import './tasks.css';
+import { driverProps } from '../driversList/Driver';
 
 class Tasks extends Component {
 
@@ -9,11 +11,11 @@ class Tasks extends Component {
   };
 
   render() {
-    const { list } = this.props;
+    const { list, driversList } = this.props;
     return (
       <div>
         <h3>Total Tasks: {list.length}</h3>
-        <table>
+        <table className="tasks-table">
           <thead>
           <tr>
             <td>Title</td>
@@ -26,7 +28,7 @@ class Tasks extends Component {
           </tr>
           </thead>
           <tbody>
-          {list.map(task => <TaskRow task={task} onShowTaskClick={this.onShowTaskOnMapClick} key={task._id} />)}
+          {list.map(task => <TaskRow task={task} driversList={driversList} onAssignTask={this.props.onAssignTask} onShowTaskClick={this.onShowTaskOnMapClick} key={task._id} />)}
           </tbody>
         </table>
       </div>
@@ -35,7 +37,9 @@ class Tasks extends Component {
 }
 
 Tasks.propType = {
-  list: PropTypes.arrayOf(TaskProps).isRequired
+  list: PropTypes.arrayOf(TaskProps).isRequired,
+  driversList: PropTypes.arrayOf(PropTypes.shape(driverProps)),
+  onAssignTask: PropTypes.func.isRequired
 };
 
 Tasks.defaultPropTypes = {};

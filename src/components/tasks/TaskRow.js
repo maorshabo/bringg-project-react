@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { driverProps } from '../driversList/Driver';
+import DriverSelector from './DriverSelector';
 
 const TaskRow = (props) => {
   const { task } = props;
@@ -10,10 +12,15 @@ const TaskRow = (props) => {
     props.onShowTaskClick(props.task);
   };
 
+  const onDriverSelected = (driver) => {
+    props.onAssignTask(props.task, driver);
+  };
+
   return (
     <tr>
       <td>{task.title}</td>
       <td>{taskDate}</td>
+      <td><DriverSelector drivers={props.driversList} onSelect={onDriverSelected}/></td>
       <td>{task.address}</td>
       <td>{task.location.latitude}</td>
       <td>{task.location.longitude}</td>
@@ -37,7 +44,9 @@ export const TaskProps = {
 
 TaskRow.propTypes = {
   task: PropTypes.shape(TaskProps).isRequired,
-  onShowTaskClick: PropTypes.func.isRequired
+  onShowTaskClick: PropTypes.func.isRequired,
+  driversList: PropTypes.arrayOf(PropTypes.shape(driverProps)),
+  onAssignTask: PropTypes.func.isRequired
 };
 
 TaskRow.defaultProps = {

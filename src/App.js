@@ -36,6 +36,11 @@ class App extends Component {
 
   };
 
+  onAssignTask = (task, driver) => {
+    console.log(task);
+    console.log(driver);
+  };
+
   sortDriversBy = (byField) => {
     const { driversSort, filteredDriversList } = this.state;
     driversSort[byField] *= -1;
@@ -76,7 +81,7 @@ class App extends Component {
   };
 
   render() {
-    const { filteredDriversList, tasksList } = this.state;
+    const { filteredDriversList, tasksList, driversList } = this.state;
     return (
       <div className="App">
         <div className="main-section">
@@ -89,7 +94,7 @@ class App extends Component {
           </div>
         </div>
         <div className="tasks-list-container">
-          <Tasks list={tasksList} />
+          <Tasks list={tasksList} driversList={driversList} />
         </div>
       </div>
     );

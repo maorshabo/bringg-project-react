@@ -1,0 +1,8 @@
+.tasks-table {
+    width: 100%;
+    border: #CCC 1px solid;
+}
+
+.tasks-table tr td {
+    border-bottom: #ccc 1px solid;
+}
