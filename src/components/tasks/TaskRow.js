@@ -37,8 +37,8 @@ export const TaskProps = {
   address: PropTypes.string.isRequired,
   scheduled_at: PropTypes.string.isRequired,
   location: PropTypes.shape({
-    latitude: PropTypes.string.isRequired,
-    longitude: PropTypes.string.isRequired
+    latitude: PropTypes.number.isRequired,
+    longitude: PropTypes.number.isRequired
   })
 };
 

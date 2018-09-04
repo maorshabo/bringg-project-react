@@ -11,7 +11,7 @@ const DriverSelector = (props) => {
   return (
     <select onChange={onDriverSelected}>
       <option value="">Select driver</option>
-      {props.drivers.map(driver => <option value={driver._id}>{driver.name.first} {driver.name.last}</option>)}
+      {props.drivers.map(driver => <option key={driver._id} value={driver._id}>{driver.name.first} {driver.name.last}</option>)}
     </select>
   );
 };

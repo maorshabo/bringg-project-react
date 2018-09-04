@@ -39,7 +39,8 @@ class Tasks extends Component {
 Tasks.propType = {
   list: PropTypes.arrayOf(TaskProps).isRequired,
   driversList: PropTypes.arrayOf(PropTypes.shape(driverProps)),
-  onAssignTask: PropTypes.func.isRequired
+  onAssignTask: PropTypes.func.isRequired,
+  onLocateTask: PropTypes.func.isRequired
 };
 
 Tasks.defaultPropTypes = {};

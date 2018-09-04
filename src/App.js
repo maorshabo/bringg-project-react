@@ -90,11 +90,11 @@ class App extends Component {
             <DriversList onDeleteDriver={this.onDeleteDriver} drivers={filteredDriversList} />
           </div>
           <div className="map-container flex-2">
-            <Map />
+            <Map driversList={filteredDriversList} tasksList={tasksList} />
           </div>
         </div>
         <div className="tasks-list-container">
-          <Tasks list={tasksList} driversList={driversList} />
+          <Tasks list={tasksList} driversList={driversList} onAssignTask={this.onAssignTask} />
         </div>
       </div>
     );

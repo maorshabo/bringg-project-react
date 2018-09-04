@@ -33,8 +33,8 @@ export const driverProps = {
   picture: PropTypes.string.isRequired,
   tasks: PropTypes.array,
   location: PropTypes.shape({
-    latitude: PropTypes.string.isRequired,
-    longitude: PropTypes.string.isRequired,
+    latitude: PropTypes.number.isRequired,
+    longitude: PropTypes.number.isRequired,
   })
 };
 
