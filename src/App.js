@@ -10,21 +10,33 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      driversList: [],
+      driversList: {},
       filteredDriversList: [],
       tasksList: [],
       driversSort: {
         name: 1,
         age: 1,
-      }
+      },
+      filters: {
+        name: '',
+        age: undefined
+      },
+      mapCenter: { lat: -34.397, lng: 150.644 }
     }
   }
+
+  mapDriversById = (driversArray) => {
+    return driversArray.reduce((prev, current) => {
+      prev[current._id] = current;
+      return prev;
+    }, {});
+  };
 
   componentDidMount() {
     Promise.all([API.getDrivers(), API.getTasks()])
       .then(responses => {
         this.setState({
-          driversList: responses[0],
+          driversList: this.mapDriversById(responses[0]),
           tasksList: responses[1],
           filteredDriversList: responses[0]
         })
@@ -33,12 +45,30 @@ class App extends Component {
   }
 
   onDeleteDriver = (driver) => {
-
+    if (driver && driver._id) {
+      const { driversList } = this.state;
+      delete driversList[driver._id];
+      this.setState({ driversList }, () => {
+        this.filterDrivers(this.state.filters.name, this.state.filters.age);
+      });
+    }
   };
 
-  onAssignTask = (task, driver) => {
-    console.log(task);
-    console.log(driver);
+  setMapCenter(lat, lng) {
+    this.setState({ mapCenter: { lat, lng } });
+  }
+
+  onAssignTask = (taskId, driverId = '') => {
+    const { driversList } = this.state;
+    if (driverId.length > 0) {
+      if (!driversList[driverId].tasks || !Array.isArray(driversList[driverId].tasks)) {
+        driversList[driverId].tasks = [];
+      }
+      driversList[driverId].tasks.push(taskId);
+      this.setState({ driversList }, () => {
+        this.filterDrivers(this.state.filters.name, this.state.filters.age);
+      });
+    }
   };
 
   sortDriversBy = (byField) => {
@@ -55,13 +85,17 @@ class App extends Component {
   filterDrivers = (name = '', age) => {
     if (name.length === 0 && (!age || age === 0)) {
       this.setState({
-        filteredDriversList: this.state.driversList
+        filteredDriversList: Object.values(this.state.driversList),
+        filters: {
+          name,
+          age
+        }
       });
     }
     else {
-      const { driversList } = this.state;
+      const driversArray = Object.values(this.state.driversList);
       const loweredName = name.toLowerCase();
-      const filteredDriversList = driversList.filter(driver => {
+      const filteredDriversList = driversArray.filter(driver => {
         const firstName = driver.name.first.toLowerCase();
         const lastName = driver.name.last.toLowerCase();
         const isNameMatched = (firstName.indexOf(loweredName) > -1 || lastName.indexOf(loweredName) > -1);
@@ -76,25 +110,49 @@ class App extends Component {
           return isNameMatched;
         }
       });
-      this.setState({ filteredDriversList });
+      this.setState({
+        filteredDriversList,
+        filters: {
+          name,
+          age
+        }
+      });
+    }
+  };
+
+  locateTask = (task = {}) => {
+    if (task.location) {
+      this.setMapCenter(task.location.latitude, task.location.longitude);
+    }
+  };
+
+  locateDriver = (driver = {}) => {
+    if (driver.location) {
+      this.setMapCenter(driver.location.latitude, driver.location.longitude);
     }
   };
 
   render() {
-    const { filteredDriversList, tasksList, driversList } = this.state;
+    const { filteredDriversList, tasksList, driversList, mapCenter, filters } = this.state;
+    const driversArray = Object.values(driversList);
     return (
       <div className="App">
         <div className="main-section">
           <div className="sidebar flex-1">
-            <Filters onFilter={this.filterDrivers} />
-            <DriversList onDeleteDriver={this.onDeleteDriver} drivers={filteredDriversList} />
+            <Filters onFilter={this.filterDrivers} filters={filters} />
+            <DriversList onDeleteDriver={this.onDeleteDriver}
+                         drivers={filteredDriversList}
+                         onLocate={this.locateDriver} />
           </div>
           <div className="map-container flex-2">
-            <Map driversList={filteredDriversList} tasksList={tasksList} />
+            <Map driversList={filteredDriversList} tasksList={tasksList} center={mapCenter} />
           </div>
         </div>
         <div className="tasks-list-container">
-          <Tasks list={tasksList} driversList={driversList} onAssignTask={this.onAssignTask} />
+          <Tasks list={tasksList}
+                 driversList={driversArray}
+                 onAssignTask={this.onAssignTask}
+                 onLocateTask={this.locateTask} />
         </div>
       </div>
     );

@@ -4,8 +4,8 @@ import { driverProps } from '../driversList/Driver';
 
 const DriverSelector = (props) => {
 
-  const onDriverSelected = (driver) => {
-    props.onSelect(driver);
+  const onDriverSelected = (event) => {
+    props.onSelect(event.target.value);
   };
 
   return (

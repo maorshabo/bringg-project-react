@@ -4,6 +4,15 @@ import PropTypes from 'prop-types';
 const Driver = (props) => {
   const { driver } = props;
   const driverName = `${driver.name.first} ${driver.name.last}`;
+
+  const onLocate = () => {
+    props.onLocate(props.driver);
+  };
+
+  const onDelete = () => {
+    props.onDeleteDriver(props.driver);
+  };
+
   return (
     <div className="driver-row">
       <div className="driver-image">
@@ -15,9 +24,8 @@ const Driver = (props) => {
 
         <div className="driver-details-buttons">
           <span>Tasks: {(driver.tasks || []).length}</span>
-          <button className="btn btn-primary" onClick={props.onMarkActive}>Mark as active</button>
-          <button className="btn btn-success" onClick={props.onShowOnMap}>Show on map</button>
-          <button className="btn btn-alert">Location</button>
+          <button className="btn btn-danger" onClick={onDelete}>Delete</button>
+          <button className="btn btn-success" onClick={onLocate}>Show on map</button>
         </div>
       </div>
     </div>
@@ -40,8 +48,7 @@ export const driverProps = {
 
 Driver.propTypes = {
   driver: PropTypes.shape(driverProps).isRequired,
-  onMarkActive: PropTypes.func.isRequired,
-  onShowOnMap: PropTypes.func.isRequired,
+  onLocate: PropTypes.func.isRequired,
   onDeleteDriver: PropTypes.func.isRequired
 };
 

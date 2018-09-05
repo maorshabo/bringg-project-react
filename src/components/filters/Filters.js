@@ -7,8 +7,8 @@ class Filters extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      age: undefined
+      name: props.filters.name,
+      age: props.filters.age
     }
   }
 
@@ -42,7 +42,11 @@ class Filters extends PureComponent {
 }
 
 Filters.propTypes = {
-  onFilter: PropTypes.func.isRequired
+  onFilter: PropTypes.func.isRequired,
+  filters: PropTypes.shape({
+    name: PropTypes.string,
+    age: PropTypes.number,
+  })
 };
 
 Filters.defaultProps = {};

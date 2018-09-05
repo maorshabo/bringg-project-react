@@ -12,8 +12,8 @@ const TaskRow = (props) => {
     props.onShowTaskClick(props.task);
   };
 
-  const onDriverSelected = (driver) => {
-    props.onAssignTask(props.task, driver);
+  const onDriverSelected = (driverId) => {
+    props.onAssignTask(props.task._id, driverId);
   };
 
   return (

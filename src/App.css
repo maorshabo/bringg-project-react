@@ -7,6 +7,10 @@
 .App {
 }
 
+.sidebar {
+    padding-right: 10px;
+}
+
 .main-section {
     display: flex;
     flex-direction: row;

@@ -7,7 +7,11 @@ import { driverProps } from '../driversList/Driver';
 class Tasks extends Component {
 
   onShowTaskOnMapClick = (task) => {
-    console.log(task);
+    this.props.onLocateTask(task);
+  };
+
+  onAssignTask = (taskId, driverId) => {
+    this.props.onAssignTask(taskId, driverId);
   };
 
   render() {
@@ -28,7 +32,7 @@ class Tasks extends Component {
           </tr>
           </thead>
           <tbody>
-          {list.map(task => <TaskRow task={task} driversList={driversList} onAssignTask={this.props.onAssignTask} onShowTaskClick={this.onShowTaskOnMapClick} key={task._id} />)}
+          {list.map(task => <TaskRow task={task} driversList={driversList} onAssignTask={this.onAssignTask} onShowTaskClick={this.onShowTaskOnMapClick} key={task._id} />)}
           </tbody>
         </table>
       </div>

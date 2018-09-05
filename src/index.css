@@ -352,6 +352,11 @@ template {
     color: #FFF;
 }
 
+.btn-danger {
+    background: red;
+    color: #FFF;
+}
+
 .btn-success {
     background: #60D06D;
     color: #FFF;

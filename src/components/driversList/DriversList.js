@@ -5,12 +5,8 @@ import './driversList.css';
 
 class DriversList extends PureComponent {
 
-  onMarkActive = (driver) => {
-    console.log(driver);
-  };
-
   onShowOnMapClick = (driver) => {
-    console.log(driver);
+    this.props.onLocate(driver);
   };
 
   sortList = (byField) => {
@@ -34,8 +30,7 @@ class DriversList extends PureComponent {
         <h3>Drivers List ({drivers.length})</h3>
         {drivers.map(driver => <Driver key={driver._id}
                                        driver={driver}
-                                       onMarkActive={this.onMarkActive}
-                                       onShowOnMap={this.onShowOnMapClick}
+                                       onLocate={this.onShowOnMapClick}
                                        onDeleteDriver={this.deleteDriver} />
         )}
         {notFoundMessage}
@@ -46,7 +41,8 @@ class DriversList extends PureComponent {
 
 DriversList.propTypes = {
   drivers: PropTypes.arrayOf(PropTypes.shape(driverProps)).isRequired,
-  onDeleteDriver: PropTypes.func.isRequired
+  onDeleteDriver: PropTypes.func.isRequired,
+  onLocate: PropTypes.func.isRequired
 };
 
 export default DriversList;
