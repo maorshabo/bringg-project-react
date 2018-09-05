@@ -6,6 +6,12 @@
     flex-direction: column;
 }
 
+.drivers-header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+
 .driver-row {
     flex: 1;
     display: flex;
@@ -42,4 +48,8 @@
 
 .driver-details-buttons .btn {
     margin-left: 5px;
+}
+
+.sort-button:hover {
+    text-decoration: underline;
 }

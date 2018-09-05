@@ -32,11 +32,18 @@ class Map extends Component {
     const newDriversIds = props.driversList.map(driver => driver._id).join(',');
     const newTasksIds = props.tasksList.map(task => task._id).join(',');
 
+    const newTasksIsShown = props.tasksList.filter(t => t.isShown);
+
     if (newDriversIds !== currentDriversIds || newTasksIds !== currentTasksIds) {
       return {
         driversMarkers: props.driversList.map(driver => <Marker key={driver._id} icon={driverIcon} title={`${driver.name.first} ${driver.name.last}`} position={{lat: driver.location.latitude, lng: driver.location.longitude}} />),
-        tasksMarkers: props.tasksList.map(task => <Marker key={task._id} icon={packageIcon} title={task.title} position={{lat: task.location.latitude, lng: task.location.longitude}} />)
+        tasksMarkers: props.tasksList.filter(task => task.isShown).map(task => <Marker key={task._id} icon={packageIcon} title={task.title} position={{lat: task.location.latitude, lng: task.location.longitude}} />)
       };
+    }
+    if (newTasksIsShown.length !== state.tasksMarkers.length) {
+      return {
+        tasksMarkers: props.tasksList.filter(task => task.isShown).map(task => <Marker key={task._id} icon={packageIcon} title={task.title} position={{lat: task.location.latitude, lng: task.location.longitude}} />)
+      }
     }
     if (props.center.latitude !== state.currentCenter.latitude || props.center.longitude !== state.currentCenter.longitude) {
       return {
@@ -44,7 +51,6 @@ class Map extends Component {
       };
     }
 
-    // Return null if the state hasn't changed
     return null;
   }
 

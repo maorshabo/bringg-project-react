@@ -6,6 +6,11 @@ import Map from './components/map/Map';
 import Tasks from './components/tasks/Tasks';
 import API from './utils/API';
 
+const initialSort = {
+  fullName: 0,
+  age: 0,
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -13,10 +18,7 @@ class App extends Component {
       driversList: {},
       filteredDriversList: [],
       tasksList: [],
-      driversSort: {
-        name: 1,
-        age: 1,
-      },
+      driversSort: initialSort,
       filters: {
         name: '',
         age: undefined
@@ -60,32 +62,58 @@ class App extends Component {
 
   onAssignTask = (taskId, driverId = '') => {
     const { driversList } = this.state;
+    // find driver by task id
+    const driver = Object.values(driversList).find(d => (d.tasks || {}).hasOwnProperty(taskId));
+
     if (driverId.length > 0) {
-      if (!driversList[driverId].tasks || !Array.isArray(driversList[driverId].tasks)) {
-        driversList[driverId].tasks = [];
+      if (!driversList[driverId].tasks) {
+        driversList[driverId].tasks = {};
       }
-      driversList[driverId].tasks.push(taskId);
-      this.setState({ driversList }, () => {
-        this.filterDrivers(this.state.filters.name, this.state.filters.age);
-      });
+      driversList[driverId].tasks[taskId] = true;
+      if (driver && driver._id !== driverId) {
+        driversList[driver._id].tasks[taskId] = false;
+      }
     }
+    else {
+      driversList[driver._id].tasks[taskId] = false;
+    }
+    this.setState({ driversList }, () => {
+      this.filterDrivers(this.state.filters.name, this.state.filters.age);
+    });
   };
 
-  sortDriversBy = (byField) => {
-    const { driversSort, filteredDriversList } = this.state;
-    driversSort[byField] *= -1;
+  sortDrivers = (driversList, sortStatus) => {
+    let { driversSort, filteredDriversList } = this.state;
 
-    const sortedDrivers = filteredDriversList.sort((a, b) => {
-      return a[byField] - b[byField];
+    const currentDriversSort = sortStatus ? sortStatus : driversSort;
+    const sortKey = Object.keys(currentDriversSort).find(s => currentDriversSort[s] !== 0);
+    const listToSort = Array.isArray(driversList) ? driversList : filteredDriversList;
+    const sortedDrivers = listToSort.sort((a, b) => {
+      if (a[sortKey] < b[sortKey]) return -1 * currentDriversSort[sortKey];
+      else if (a[sortKey] > b[sortKey]) return 1 * currentDriversSort[sortKey];
+      else return 0;
     });
+    return Array.from(sortedDrivers);
+  };
 
-    this.setState({ driversSort, filteredDriversList: sortedDrivers });
+  onSortByField = (byField) => {
+    let { driversSort } = this.state;
+    const oldSortValue = driversSort[byField];
+    driversSort = Object.assign({}, initialSort);
+    if (oldSortValue === 0) {
+      driversSort[byField] = 1;
+    }
+    else {
+      driversSort[byField] = oldSortValue * -1;
+    }
+    const filteredDriversList = this.sortDrivers(this.state.filteredDriversList, driversSort);
+    this.setState({ filteredDriversList, driversSort });
   };
 
   filterDrivers = (name = '', age) => {
     if (name.length === 0 && (!age || age === 0)) {
       this.setState({
-        filteredDriversList: Object.values(this.state.driversList),
+        filteredDriversList: this.sortDrivers(Object.values(this.state.driversList)),
         filters: {
           name,
           age
@@ -96,9 +124,8 @@ class App extends Component {
       const driversArray = Object.values(this.state.driversList);
       const loweredName = name.toLowerCase();
       const filteredDriversList = driversArray.filter(driver => {
-        const firstName = driver.name.first.toLowerCase();
-        const lastName = driver.name.last.toLowerCase();
-        const isNameMatched = (firstName.indexOf(loweredName) > -1 || lastName.indexOf(loweredName) > -1);
+        const fullName = driver.fullName.toLowerCase();
+        const isNameMatched = fullName.indexOf(loweredName) > -1;
 
         if (loweredName.length > 0 && age > 0) {
           return isNameMatched && driver.age === age;
@@ -111,7 +138,7 @@ class App extends Component {
         }
       });
       this.setState({
-        filteredDriversList,
+        filteredDriversList: this.sortDrivers(filteredDriversList),
         filters: {
           name,
           age
@@ -122,7 +149,12 @@ class App extends Component {
 
   locateTask = (task = {}) => {
     if (task.location) {
+      // update tasksList
+      const { tasksList } = this.state;
+      const taskIdx = tasksList.findIndex(t => t._id === task._id);
+      tasksList[taskIdx] = Object.assign({}, tasksList[taskIdx], task);
       this.setMapCenter(task.location.latitude, task.location.longitude);
+      this.setState({ tasksList });
     }
   };
 
@@ -133,7 +165,7 @@ class App extends Component {
   };
 
   render() {
-    const { filteredDriversList, tasksList, driversList, mapCenter, filters } = this.state;
+    const { filteredDriversList, tasksList, driversList, mapCenter, filters, driversSort } = this.state;
     const driversArray = Object.values(driversList);
     return (
       <div className="App">
@@ -142,6 +174,8 @@ class App extends Component {
             <Filters onFilter={this.filterDrivers} filters={filters} />
             <DriversList onDeleteDriver={this.onDeleteDriver}
                          drivers={filteredDriversList}
+                         sortStatus={driversSort}
+                         onOrder={this.onSortByField}
                          onLocate={this.locateDriver} />
           </div>
           <div className="map-container flex-2">

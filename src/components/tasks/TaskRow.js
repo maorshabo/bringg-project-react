@@ -25,7 +25,7 @@ const TaskRow = (props) => {
       <td>{task.location.latitude}</td>
       <td>{task.location.longitude}</td>
       <td>
-        <button onClick={onShowClick}>Show</button>
+        <button className="btn btn-success" onClick={onShowClick}>Show</button>
       </td>
     </tr>
   );

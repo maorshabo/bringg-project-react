@@ -7,6 +7,9 @@ import { driverProps } from '../driversList/Driver';
 class Tasks extends Component {
 
   onShowTaskOnMapClick = (task) => {
+    if (task.hasOwnProperty('isShown')) {
+      task.isShown = !task.isShown;
+    }
     this.props.onLocateTask(task);
   };
 
