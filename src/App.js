@@ -61,23 +61,30 @@ class App extends Component {
   }
 
   onAssignTask = (taskId, driverId = '') => {
-    const { driversList } = this.state;
+    const { driversList, tasksList } = this.state;
+
     // find driver by task id
     const driver = Object.values(driversList).find(d => (d.tasks || {}).hasOwnProperty(taskId));
+    const taskIdx = tasksList.findIndex(t => t._id === taskId);
 
     if (driverId.length > 0) {
+      // init tasks object on the driver
       if (!driversList[driverId].tasks) {
         driversList[driverId].tasks = {};
       }
+      // assign the task to the driver
       driversList[driverId].tasks[taskId] = true;
+      // assign the driver to the task
+      tasksList[taskIdx].driverId = driverId;
       if (driver && driver._id !== driverId) {
         driversList[driver._id].tasks[taskId] = false;
       }
     }
     else {
       driversList[driver._id].tasks[taskId] = false;
+      tasksList[taskIdx].driverId = undefined;
     }
-    this.setState({ driversList }, () => {
+    this.setState({ driversList, tasksList }, () => {
       this.filterDrivers(this.state.filters.name, this.state.filters.age);
     });
   };
@@ -164,9 +171,29 @@ class App extends Component {
     }
   };
 
+  getFilteredTasks = (driversList) => {
+    const tasksIds = driversList
+      .map(driver => Object.keys(driver.tasks || {}))
+      .filter(arr => arr.length > 0)
+      .reduce((prev, current) => {
+        return prev.concat(current);
+      }, [])
+      .reduce((prev, current) => {
+        prev[current] = true;
+        return prev;
+      }, {});
+    return tasksIds;
+  };
+
   render() {
     const { filteredDriversList, tasksList, driversList, mapCenter, filters, driversSort } = this.state;
     const driversArray = Object.values(driversList);
+    let filteredTasks = tasksList;
+    if (filteredDriversList.length !== driversArray.length) {
+      const taskIds = this.getFilteredTasks(filteredDriversList);
+      filteredTasks = tasksList.filter(task => taskIds[task._id]);
+    }
+
     return (
       <div className="App">
         <div className="main-section">
@@ -183,7 +210,7 @@ class App extends Component {
           </div>
         </div>
         <div className="tasks-list-container">
-          <Tasks list={tasksList}
+          <Tasks list={filteredTasks}
                  driversList={driversArray}
                  onAssignTask={this.onAssignTask}
                  onLocateTask={this.locateTask} />

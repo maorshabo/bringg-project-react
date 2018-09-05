@@ -7,6 +7,10 @@ import { driverProps } from '../driversList/Driver';
 class Tasks extends Component {
 
   onShowTaskOnMapClick = (task) => {
+    this.props.onLocateTask(task);
+  };
+
+  onToggleTaskOnMap = (task) => {
     if (task.hasOwnProperty('isShown')) {
       task.isShown = !task.isShown;
     }
@@ -32,10 +36,18 @@ class Tasks extends Component {
             <td>Lat</td>
             <td>Lng</td>
             <td>Locate on map</td>
+            <td>Toggle on map</td>
           </tr>
           </thead>
           <tbody>
-          {list.map(task => <TaskRow task={task} driversList={driversList} onAssignTask={this.onAssignTask} onShowTaskClick={this.onShowTaskOnMapClick} key={task._id} />)}
+          {list.map(task => <TaskRow
+                              key={task._id}
+                              task={task}
+                              driversList={driversList}
+                              onAssignTask={this.onAssignTask}
+                              onShowTaskClick={this.onShowTaskOnMapClick}
+                              onToggleTaskClick={this.onToggleTaskOnMap}
+            />)}
           </tbody>
         </table>
       </div>

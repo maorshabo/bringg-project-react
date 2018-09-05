@@ -6,10 +6,14 @@ import DriverSelector from './DriverSelector';
 
 const TaskRow = (props) => {
   const { task } = props;
-  const taskDate = moment(task.scheduled_at).format('DD/MM/YYYY');
+  const taskDate = moment(task.scheduled_at, "dddd, MMMM Do YYYY, h:mm:ss A").format('DD/MM/YYYY');
 
   const onShowClick = () => {
     props.onShowTaskClick(props.task);
+  };
+
+  const onToggleClick = () => {
+    props.onToggleTaskClick(props.task);
   };
 
   const onDriverSelected = (driverId) => {
@@ -20,12 +24,15 @@ const TaskRow = (props) => {
     <tr>
       <td>{task.title}</td>
       <td>{taskDate}</td>
-      <td><DriverSelector drivers={props.driversList} onSelect={onDriverSelected}/></td>
+      <td><DriverSelector selectedDriverId={task.driverId} drivers={props.driversList} onSelect={onDriverSelected}/></td>
       <td>{task.address}</td>
       <td>{task.location.latitude}</td>
       <td>{task.location.longitude}</td>
       <td>
         <button className="btn btn-success" onClick={onShowClick}>Show</button>
+      </td>
+      <td>
+        <button className="btn btn-success" onClick={onToggleClick}>Show</button>
       </td>
     </tr>
   );
@@ -39,12 +46,14 @@ export const TaskProps = {
   location: PropTypes.shape({
     latitude: PropTypes.number.isRequired,
     longitude: PropTypes.number.isRequired
-  })
+  }),
+  driverId: PropTypes.string
 };
 
 TaskRow.propTypes = {
   task: PropTypes.shape(TaskProps).isRequired,
   onShowTaskClick: PropTypes.func.isRequired,
+  onToggleTaskClick: PropTypes.func.isRequired,
   driversList: PropTypes.arrayOf(PropTypes.shape(driverProps)),
   onAssignTask: PropTypes.func.isRequired
 };

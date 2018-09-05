@@ -9,7 +9,7 @@ const DriverSelector = (props) => {
   };
 
   return (
-    <select onChange={onDriverSelected}>
+    <select onChange={onDriverSelected} value={props.selectedDriverId}>
       <option value="">Select driver</option>
       {props.drivers.map(driver => <option key={driver._id} value={driver._id}>{driver.name.first} {driver.name.last}</option>)}
     </select>
@@ -18,7 +18,8 @@ const DriverSelector = (props) => {
 
 DriverSelector.propTypes = {
   drivers: PropTypes.arrayOf(PropTypes.shape(driverProps)).isRequired,
-  onSelect: PropTypes.func.isRequired
+  onSelect: PropTypes.func.isRequired,
+  selectedDriverId: PropTypes.string
 };
 
 DriverSelector.defaultProps = {};
