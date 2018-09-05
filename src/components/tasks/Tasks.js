@@ -11,10 +11,7 @@ class Tasks extends Component {
   };
 
   onToggleTaskOnMap = (task) => {
-    if (task.hasOwnProperty('isShown')) {
-      task.isShown = !task.isShown;
-    }
-    this.props.onLocateTask(task);
+    this.props.onToggleTask(task);
   };
 
   onAssignTask = (taskId, driverId) => {
@@ -59,7 +56,8 @@ Tasks.propType = {
   list: PropTypes.arrayOf(TaskProps).isRequired,
   driversList: PropTypes.arrayOf(PropTypes.shape(driverProps)),
   onAssignTask: PropTypes.func.isRequired,
-  onLocateTask: PropTypes.func.isRequired
+  onLocateTask: PropTypes.func.isRequired,
+  onToggleTask: PropTypes.func.isRequired
 };
 
 Tasks.defaultPropTypes = {};

@@ -4,7 +4,8 @@ import Filters from './components/filters/Filters';
 import DriversList from './components/driversList/DriversList';
 import Map from './components/map/Map';
 import Tasks from './components/tasks/Tasks';
-import API from './utils/API';
+import Drivers from './models/drivers';
+import TasksModel from './models/tasksModel';
 
 const initialSort = {
   fullName: 0,
@@ -14,8 +15,10 @@ const initialSort = {
 class App extends Component {
   constructor(props) {
     super(props);
+    this.drivers = new Drivers();
+    this.tasks = new TasksModel();
+
     this.state = {
-      driversList: {},
       filteredDriversList: [],
       tasksList: [],
       driversSort: initialSort,
@@ -27,20 +30,12 @@ class App extends Component {
     }
   }
 
-  mapDriversById = (driversArray) => {
-    return driversArray.reduce((prev, current) => {
-      prev[current._id] = current;
-      return prev;
-    }, {});
-  };
-
   componentDidMount() {
-    Promise.all([API.getDrivers(), API.getTasks()])
+    Promise.all([this.drivers.getAll(), this.tasks.getAll()])
       .then(responses => {
         this.setState({
-          driversList: this.mapDriversById(responses[0]),
           tasksList: responses[1],
-          filteredDriversList: responses[0]
+          filteredDriversList: this.drivers.getDriversArray()
         })
       })
       .catch(console.error)
@@ -48,11 +43,8 @@ class App extends Component {
 
   onDeleteDriver = (driver) => {
     if (driver && driver._id) {
-      const { driversList } = this.state;
-      delete driversList[driver._id];
-      this.setState({ driversList }, () => {
-        this.filterDrivers(this.state.filters.name, this.state.filters.age);
-      });
+      const filteredDriversList = this.drivers.deleteDriver(driver);
+      this.setState({ filteredDriversList });
     }
   };
 
@@ -60,33 +52,16 @@ class App extends Component {
     this.setState({ mapCenter: { lat, lng } });
   }
 
-  onAssignTask = (taskId, driverId = '') => {
-    const { driversList, tasksList } = this.state;
+  onToggleTask = (task = {}) => {
+    const newTasks = this.tasks.toggleTaskShown(task._id);
+    this.setState({ tasksList: newTasks });
+  };
 
-    // find driver by task id
-    const driver = Object.values(driversList).find(d => (d.tasks || {}).hasOwnProperty(taskId));
-    const taskIdx = tasksList.findIndex(t => t._id === taskId);
+  onAssignTask = (taskId, driverId) => {
+    const newTasksList = this.tasks.assignTask(taskId, driverId);
 
-    if (driverId.length > 0) {
-      // init tasks object on the driver
-      if (!driversList[driverId].tasks) {
-        driversList[driverId].tasks = {};
-      }
-      // assign the task to the driver
-      driversList[driverId].tasks[taskId] = true;
-      // assign the driver to the task
-      tasksList[taskIdx].driverId = driverId;
-      if (driver && driver._id !== driverId) {
-        driversList[driver._id].tasks[taskId] = false;
-      }
-    }
-    else {
-      driversList[driver._id].tasks[taskId] = false;
-      tasksList[taskIdx].driverId = undefined;
-    }
-    this.setState({ driversList, tasksList }, () => {
-      this.filterDrivers(this.state.filters.name, this.state.filters.age);
-    });
+    const newDriversList = this.drivers.assignTask(taskId, driverId);
+    this.setState({ tasksList: newTasksList, filteredDriversList: newDriversList });
   };
 
   sortDrivers = (driversList, sortStatus) => {
@@ -118,79 +93,23 @@ class App extends Component {
   };
 
   filterDrivers = (name = '', age) => {
-    if (name.length === 0 && (!age || age === 0)) {
-      this.setState({
-        filteredDriversList: this.sortDrivers(Object.values(this.state.driversList)),
-        filters: {
-          name,
-          age
-        }
-      });
-    }
-    else {
-      const driversArray = Object.values(this.state.driversList);
-      const loweredName = name.toLowerCase();
-      const filteredDriversList = driversArray.filter(driver => {
-        const fullName = driver.fullName.toLowerCase();
-        const isNameMatched = fullName.indexOf(loweredName) > -1;
-
-        if (loweredName.length > 0 && age > 0) {
-          return isNameMatched && driver.age === age;
-        }
-        else if (name.length === 0 && age > 0) {
-          return driver.age === age;
-        }
-        else {
-          return isNameMatched;
-        }
-      });
-      this.setState({
-        filteredDriversList: this.sortDrivers(filteredDriversList),
-        filters: {
-          name,
-          age
-        }
-      });
-    }
+    const filteredDrivers = this.drivers.filterDrivers(name, age);
+    const sortedDrivers = this.sortDrivers(Object.values(filteredDrivers));
+    this.setState({ filteredDriversList: sortedDrivers});
   };
 
-  locateTask = (task = {}) => {
-    if (task.location) {
-      // update tasksList
-      const { tasksList } = this.state;
-      const taskIdx = tasksList.findIndex(t => t._id === task._id);
-      tasksList[taskIdx] = Object.assign({}, tasksList[taskIdx], task);
-      this.setMapCenter(task.location.latitude, task.location.longitude);
-      this.setState({ tasksList });
+  locateItem = (item = {}) => {
+    if (item.location) {
+      this.setMapCenter(item.location.latitude, item.location.longitude);
     }
-  };
-
-  locateDriver = (driver = {}) => {
-    if (driver.location) {
-      this.setMapCenter(driver.location.latitude, driver.location.longitude);
-    }
-  };
-
-  getFilteredTasks = (driversList) => {
-    const tasksIds = driversList
-      .map(driver => Object.keys(driver.tasks || {}))
-      .filter(arr => arr.length > 0)
-      .reduce((prev, current) => {
-        return prev.concat(current);
-      }, [])
-      .reduce((prev, current) => {
-        prev[current] = true;
-        return prev;
-      }, {});
-    return tasksIds;
   };
 
   render() {
-    const { filteredDriversList, tasksList, driversList, mapCenter, filters, driversSort } = this.state;
-    const driversArray = Object.values(driversList);
+    const { filteredDriversList, tasksList, mapCenter, filters, driversSort } = this.state;
+    const driversArray = this.drivers.filterDrivers(this.state.filters.name, this.state.filters.age);
     let filteredTasks = tasksList;
     if (filteredDriversList.length !== driversArray.length) {
-      const taskIds = this.getFilteredTasks(filteredDriversList);
+      const taskIds = this.drivers.getAllDriversTasks(filteredDriversList);
       filteredTasks = tasksList.filter(task => taskIds[task._id]);
     }
 
@@ -203,17 +122,18 @@ class App extends Component {
                          drivers={filteredDriversList}
                          sortStatus={driversSort}
                          onOrder={this.onSortByField}
-                         onLocate={this.locateDriver} />
+                         onLocate={this.locateItem} />
           </div>
           <div className="map-container flex-2">
-            <Map driversList={filteredDriversList} tasksList={tasksList} center={mapCenter} />
+            <Map driversList={filteredDriversList} tasksList={filteredTasks} center={mapCenter} />
           </div>
         </div>
         <div className="tasks-list-container">
           <Tasks list={filteredTasks}
                  driversList={driversArray}
                  onAssignTask={this.onAssignTask}
-                 onLocateTask={this.locateTask} />
+                 onToggleTask={this.onToggleTask}
+                 onLocateTask={this.locateItem} />
         </div>
       </div>
     );

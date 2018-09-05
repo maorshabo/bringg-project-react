@@ -20,6 +20,8 @@ const TaskRow = (props) => {
     props.onAssignTask(props.task._id, driverId);
   };
 
+  const toggleButtonClasses = `btn ${task.isShown ? 'btn-danger' : 'btn-success'}`;
+  const toggleButtonLabel = task.isShown ? 'Hide' : 'Show';
   return (
     <tr>
       <td>{task.title}</td>
@@ -32,7 +34,7 @@ const TaskRow = (props) => {
         <button className="btn btn-success" onClick={onShowClick}>Show</button>
       </td>
       <td>
-        <button className="btn btn-success" onClick={onToggleClick}>Show</button>
+        <button className={toggleButtonClasses} onClick={onToggleClick}>{toggleButtonLabel}</button>
       </td>
     </tr>
   );
